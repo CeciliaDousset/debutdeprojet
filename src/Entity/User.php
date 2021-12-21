@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -40,12 +42,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $nomcomplet;
+    private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $telephone;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Address::class, mappedBy="user", cascade={"persist", "remove"})
+     */
+    private $address;
+
+    /**
+     * @ORM\OneToMany(targetEntity=CommandShop::class, mappedBy="user")
+     */
+    private $commandShops;
+
+    public function __construct()
+    {
+        $this->commandShops = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -136,14 +153,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getNomcomplet(): ?string
+    public function getName(): ?string
     {
-        return $this->nomcomplet;
+        return $this->name;
     }
 
-    public function setNomcomplet(string $nomcomplet): self
+    public function setName(string $name): self
     {
-        $this->nomcomplet = $nomcomplet;
+        $this->name = $name;
 
         return $this;
     }
@@ -156,6 +173,53 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelephone(string $telephone): self
     {
         $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function setAddress(Address $address): self
+    {
+        // set the owning side of the relation if necessary
+        if ($address->getUser() !== $this) {
+            $address->setUser($this);
+        }
+
+        $this->address = $address;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CommandShop[]
+     */
+    public function getCommandShops(): Collection
+    {
+        return $this->commandShops;
+    }
+
+    public function addCommandShop(CommandShop $commandShop): self
+    {
+        if (!$this->commandShops->contains($commandShop)) {
+            $this->commandShops[] = $commandShop;
+            $commandShop->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommandShop(CommandShop $commandShop): self
+    {
+        if ($this->commandShops->removeElement($commandShop)) {
+            // set the owning side to null (unless already changed)
+            if ($commandShop->getUser() === $this) {
+                $commandShop->setUser(null);
+            }
+        }
 
         return $this;
     }

@@ -25,6 +25,12 @@ security:
                 path: app_logout
                 # where to redirect after logout
                 # target: app_any_route
+            login_link:
+                check_route: login_check
+                signature_properties: [id]
+                lifetime: 600
+                max_uses: 5
+                success_handler: App\Security\Authentication\AuthenticationSuccessHandler
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -35,5 +41,5 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

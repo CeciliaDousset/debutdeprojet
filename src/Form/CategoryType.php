@@ -6,6 +6,8 @@ use App\Entity\Category;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\File;
 
 class CategoryType extends AbstractType
@@ -14,18 +16,16 @@ class CategoryType extends AbstractType
     {
         $builder
             ->add('name',TextType::class,[
-
-                'label'=> 'Nom de la categorie'
+                'label' => 'Nom de la catégorie'
             ])
             ->add('file',FileType::class,[
                 'label' => 'Ajouter une image',
                 'mapped' => false,
-                'contraints' => [
-                    new File ([
-                        'maxSize' => '10m',
+                'constraints' => [
+                    new File([
+                        'maxSize' => '1m'
                     ])
-                ]
-
+                ],
             ])
         ;
     }

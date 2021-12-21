@@ -1,15 +1,18 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Entity\Category;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
+use App\MesServices\HandleImageService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/admin/category")
@@ -29,13 +32,25 @@ class CategoryController extends AbstractController
     /**
      * @Route("/new", name="category_new", methods={"GET", "POST"})
      */
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager,
+                        HandleImageService $handleImageService): Response
     {
         $category = new Category();
         $form = $this->createForm(CategoryType::class, $category);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            //Je dois recuperer le fichier image
+
+            /** @var UploadedFile $file */
+            $file = $form->get('file')->getData();
+
+            if($file)
+            {
+                $handleImageService->save($file,$category);
+            }
+
             $entityManager->persist($category);
             $entityManager->flush();
 
@@ -61,12 +76,25 @@ class CategoryController extends AbstractController
     /**
      * @Route("/{id}/edit", name="category_edit", methods={"GET", "POST"})
      */
-    public function edit(Request $request, Category $category, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Category $category, EntityManagerInterface $entityManager,
+            HandleImageService $handleImageService): Response
     {
         $form = $this->createForm(CategoryType::class, $category);
+
+        $originalImagePath = $category->getImagePath();
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            /** @var UploadedFile $file */
+            $file = $form->get('file')->getData();
+
+            if($file)
+            {
+                $handleImageService->edit($file,$category,$originalImagePath);
+            }
+
             $entityManager->flush();
 
             return $this->redirectToRoute('category_index', [], Response::HTTP_SEE_OTHER);
