@@ -23,13 +23,14 @@ class ProductType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new File([
-                        'maxSize' => '1m'
+                        'maxSize' => '0m'
                     ])
                 ],
             ])
             ->add('name',TextType::class,[
                 'label' => 'Nom du produit'
             ])
+            
             ->add('price',MoneyType::class,[
                 'divisor' => 100,
                 'currency' => 'EUR',
